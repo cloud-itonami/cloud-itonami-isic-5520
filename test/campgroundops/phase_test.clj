@@ -32,8 +32,18 @@
       (is (= :commit disposition)))
     (let [{:keys [disposition]} (phase/gate 3 {:op :schedule-facility-maintenance} :commit)]
       (is (= :commit disposition)))
-    (let [{:keys [disposition]} (phase/gate 3 {:op :coordinate-supply-restock} :commit)]
-      (is (= :commit disposition)))))
+    (testing ":coordinate-supply-restock is NOT among them -- its cost is
+              self-declared with no filed supply catalog to check it against,
+              and an unverifiable amount must not buy an auto-commit"
+      (let [{:keys [disposition reason]} (phase/gate 3 {:op :coordinate-supply-restock} :commit)]
+        (is (= :escalate disposition))
+        (is (= :phase-approval reason))))))
+
+(deftest supply-restock-never-auto-commits-at-any-phase
+  (testing "the structural invariant, agreed by the phase table and the governor"
+    (doseq [ph (keys phase/phases)]
+      (is (not (contains? (:auto (get phase/phases ph)) :coordinate-supply-restock))
+          (str "phase " ph " must not auto-commit an unverifiable restock cost")))))
 
 (deftest guest-safety-concern-holds-when-not-enabled
   (testing ":flag-guest-safety-concern holds in phases 0-2 (not yet enabled)"

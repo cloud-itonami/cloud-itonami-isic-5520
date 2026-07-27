@@ -179,13 +179,36 @@
         :detail "避難命令の発令/緊急当局への直接連絡/ゲスト安全当局の判断の上書きは永久に禁止"}])))
 
 (defn- high-cost-supply-restock?
-  "A `:coordinate-supply-restock` proposal whose `:value
-  :estimated-cost` exceeds `high-cost-threshold` ALWAYS escalates,
-  regardless of confidence."
+  "A `:coordinate-supply-restock` proposal escalates to a human unless
+  its cost can be established to be BELOW `high-cost-threshold`.
+
+  Note the direction. This gate used to read `:value :estimated-cost`
+  out of the advisor's own proposal and escalate only when that number
+  exceeded the threshold, which made the gate's only input the very
+  number it existed to doubt:
+
+    - an advisor understating a large order bought itself an
+      auto-commit at phase 3, where `:coordinate-supply-restock` is
+      `:auto`-eligible -- no human saw it at all;
+    - `(some-> amount (> threshold))` returned nil when the field was
+      ABSENT, so omitting `:estimated-cost` skipped the gate entirely.
+
+  There is no filed supply catalog in this actor's store to recompute
+  an order's cost from, so a self-declared amount cannot be verified.
+  An unverifiable number is worthless as a DE-escalation signal: it may
+  raise the alarm, it must never silence it. So the gate now escalates
+  whenever the cost is absent, non-numeric, or above the threshold, and
+  stands down only for a number that is present, numeric and below it.
+
+  `campgroundops.phase` independently agrees -- `:coordinate-supply-
+  restock` is no longer a member of any phase's `:auto` set. Two
+  layers, not one, the same discipline `:flag-guest-safety-concern`
+  already has."
   [proposal]
-  (and (= :coordinate-supply-restock (:op proposal))
-       (some-> (get-in proposal [:value :estimated-cost])
-               (> high-cost-threshold))))
+  (when (= :coordinate-supply-restock (:op proposal))
+    (let [cost (get-in proposal [:value :estimated-cost])]
+      (or (not (number? cost))
+          (> cost high-cost-threshold)))))
 
 (defn check
   "Censors a CampgroundOpsAdvisor proposal against the governor rules.

@@ -39,7 +39,13 @@
    2 {:label "assisted-coordination"  :writes #{:log-site-occupancy-record :schedule-facility-maintenance
                                                 :coordinate-supply-restock}                                      :auto #{}}
    3 {:label "supervised-auto"        :writes write-ops
-      :auto #{:log-site-occupancy-record :schedule-facility-maintenance :coordinate-supply-restock}}})
+;; `:coordinate-supply-restock` is deliberately ABSENT from every
+   ;; phase's `:auto` set. Its cost is self-declared with no filed supply
+   ;; catalog to check it against, and an unverifiable amount must not be
+   ;; able to buy an auto-commit -- see `campgroundops.governor`'s
+   ;; `high-cost-supply-restock?`, which independently reaches the same
+   ;; conclusion.
+      :auto #{:log-site-occupancy-record :schedule-facility-maintenance}}})
 
 (def default-phase 3)
 

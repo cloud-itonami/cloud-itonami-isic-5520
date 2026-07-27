@@ -132,3 +132,53 @@
       (is (true? (:ok? verdict)))
       (is (false? (:hard? verdict)))
       (is (false? (:escalate? verdict))))))
+
+;; ---------------------------------------------------------------------------
+;; The threshold gate must not read the number it exists to doubt
+;; ---------------------------------------------------------------------------
+
+(deftest omitting-the-cost-no-longer-skips-the-gate
+  (testing "`(some-> amount (> threshold))` returned nil when :estimated-cost was
+            ABSENT, so a restock proposal carrying no cost at all escalated to
+            nobody -- and :coordinate-supply-restock was :auto-eligible at
+            phase 3, so it auto-committed"
+    (let [s (store/mem-store {"site-1" site-1})
+          amountless (assoc (clean-proposal :coordinate-supply-restock "site-1")
+                            :value {:item "propane" :quantity 4} :confidence 0.99)
+          verdict (gov/check {} nil amountless s)]
+      (is (true? (:high-stakes? verdict)))
+      (is (true? (:escalate? verdict)))
+      (is (false? (:ok? verdict))))))
+
+(deftest a-non-numeric-cost-escalates-rather-than-being-compared
+  (let [s (store/mem-store {"site-1" site-1})]
+    (doseq [bad ["500" :unknown {} nil]]
+      (let [p (assoc (clean-proposal :coordinate-supply-restock "site-1")
+                     :value {:estimated-cost bad} :confidence 0.99)]
+        (is (true? (:high-stakes? (gov/check {} nil p s)))
+            (str "non-numeric cost " (pr-str bad) " must escalate, not slip through"))))))
+
+(deftest a-cost-below-the-threshold-still-stands-the-gate-down
+  (testing "the gate is not simply always-on: a present, numeric, below-threshold
+            cost is the one case it stands down for"
+    (let [s (store/mem-store {"site-1" site-1})
+          routine (assoc (clean-proposal :coordinate-supply-restock "site-1")
+                         :value {:item "propane" :quantity 4 :estimated-cost 80}
+                         :confidence 0.9)
+          verdict (gov/check {} nil routine s)]
+      (is (false? (:high-stakes? verdict)))
+      (is (false? (:hard? verdict))))))
+
+(deftest a-cost-above-the-threshold-still-escalates
+  (let [s (store/mem-store {"site-1" site-1})
+        big (assoc (clean-proposal :coordinate-supply-restock "site-1")
+                   :value {:item "bulk firewood" :quantity 200 :estimated-cost 900}
+                   :confidence 0.99)]
+    (is (true? (:high-stakes? (gov/check {} nil big s))))))
+
+(deftest the-gate-applies-only-to-the-restock-op
+  (let [s (store/mem-store {"site-1" site-1})]
+    (doseq [o [:log-site-occupancy-record :schedule-facility-maintenance]]
+      (let [p (assoc (clean-proposal o "site-1") :value {} :confidence 0.9)]
+        (is (false? (:high-stakes? (gov/check {} nil p s)))
+            (str o " carries no cost and must not be swept into the cost gate"))))))
