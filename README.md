@@ -47,11 +47,11 @@ clojure -M:run
 
 ## Test suite
 
-- `test/campgroundops/governor_test.clj` — unit tests of governor hard checks and scope exclusion
-- `test/campgroundops/advisor_test.clj` — advisor proposal shape and consistency
-- `test/campgroundops/phase_test.clj` — rollout phase logic
-- `test/campgroundops/governor_contract_test.clj` — full graph integration, audit trail
-- `test/campgroundops/store_contract_test.clj` — Store protocol and MemStore implementation
+- `test/campgroundops/governor_test.cljk` — unit tests of governor hard checks and scope exclusion
+- `test/campgroundops/advisor_test.cljk` — advisor proposal shape and consistency
+- `test/campgroundops/phase_test.cljk` — rollout phase logic
+- `test/campgroundops/governor_contract_test.cljk` — full graph integration, audit trail
+- `test/campgroundops/store_contract_test.cljk` — Store protocol and MemStore implementation
 
 ## Modules
 
