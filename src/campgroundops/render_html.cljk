@@ -7,7 +7,7 @@
   `campgroundops.governor` -> `campgroundops.store`) through a scenario
   built from this repo's own `campgroundops.store/demo-data` (real seeded
   sites `site-1`/`site-2`/`site-3`), adapted from this repo's own
-  `campgroundops.sim` demo driver (`clojure -M:dev:run`, confirmed by
+  `campgroundops.sim` demo driver (`kbb -M:dev:run`, confirmed by
   actually running it before this file was written: every id it uses
   (site-1, site-2, site-3, plus the deliberately-unseeded site-99) checks
   out against `campgroundops.store/demo-data`'s real seed, and every
@@ -20,7 +20,7 @@
   page content, byte-identical across reruns against the same seed
   (verified by diffing two consecutive runs before shipping).
 
-  Usage: `clojure -M:dev:render-html [out-file]`
+  Usage: `kbb -M:dev:render-html [out-file]`
   (default `docs/samples/operator-console.html`)."
   (:require [jp-go-dds.skin]
             [kotoba.lang.text :as str]
@@ -215,7 +215,7 @@
      "<main>\n"
      "  <section class=\"card\">\n"
      "    <h2>Sites</h2>\n"
-     "    <p class=\"muted\">Demo snapshot — build-time-generated from <code>campgroundops.store</code> via <code>campgroundops.render-html</code> (<code>clojure -M:dev:render-html</code>), regenerated nightly.</p>\n"
+     "    <p class=\"muted\">Demo snapshot — build-time-generated from <code>campgroundops.store</code> via <code>campgroundops.render-html</code> (<code>kbb -M:dev:render-html</code>), regenerated nightly.</p>\n"
      "    <table>\n"
      "      <thead><tr><th>Site</th><th>Name</th><th>Registered</th><th>Verified</th><th>Last op status</th></tr></thead>\n"
      "      <tbody>\n"
