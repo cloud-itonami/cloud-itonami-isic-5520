@@ -1,6 +1,6 @@
 (ns campgroundops.store-contract-test
   "Contract tests for `campgroundops.store/Store` protocol."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [campgroundops.store :as store]))
 
 (deftest mem-store-site-lookup

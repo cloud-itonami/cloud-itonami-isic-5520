@@ -1,6 +1,6 @@
 (ns campgroundops.phase-test
   "Unit tests of `campgroundops.phase` rollout logic."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [campgroundops.phase :as phase]))
 
 (deftest phase-0-read-only

@@ -1,6 +1,6 @@
 (ns campgroundops.advisor-test
   "Unit tests of `campgroundops.advisor` proposal generation."
-  (:require [clojure.test :refer [deftest is testing]]
+  (:require [kotoba.test :refer [deftest is testing]]
             [campgroundops.advisor :as adv]
             [campgroundops.store :as store]))
 
